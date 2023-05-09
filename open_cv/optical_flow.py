@@ -39,22 +39,25 @@ def webcam_acess():
     cv2.destroyAllWindows()
 
 
-def webcam_optical_flow(method, params=[]):
+def webcam_optical_flow(method, params=[], gray=True):
 
     cap = cv2.VideoCapture(0)
 
     ret, old_frame = cap.read()
     hsv = np.zeros_like(old_frame)
     hsv[..., 1] = 255
-    prevs_frame = cv2.cvtColor(old_frame, cv2.COLOR_BGR2GRAY)
-
+    prevs_frame = old_frame
+    if (gray):
+        prevs_frame = cv2.cvtColor(old_frame, cv2.COLOR_BGR2GRAY)
     while True:
         cv2.imshow('Camera', old_frame)
 
         ret, new_frame = cap.read()
-        next_frame = cv2.cvtColor(new_frame, cv2.COLOR_BGR2GRAY)
+        next_frame = new_frame
+        if gray:
+            next_frame = cv2.cvtColor(new_frame, cv2.COLOR_BGR2GRAY)
 
-        flow = method(prevs_frame, next_frame, None, *params)
+        flow = method(prevs_frame, next_frame, *params)
         mag, ang = cv2.cartToPolar(flow[..., 0], flow[..., 1])
         hsv[..., 0] = ang*180/np.pi/2
         hsv[..., 2] = cv2.normalize(mag, None, 0, 255, cv2.NORM_MINMAX)
