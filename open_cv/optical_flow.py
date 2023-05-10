@@ -72,3 +72,33 @@ def webcam_optical_flow(method, params=[], gray=True):
 
     cap.release()
     cv2.destroyAllWindows()
+
+    def video_optical_flow(video_path, method, params=[], gray=True):
+        cap = cv2.VideoCapture(video_path)
+
+        # Read the first frame
+        ret, old_frame = cap.read()
+
+        hsv = np.zeros_like(old_frame)
+        hsv[..., 1] = 255
+        prevs_frame = old_frame
+
+        if (gray):
+            prevs_frame = cv2.cvtColor(old_frame, cv2.COLOR_BGR2GRAY)
+
+        while (True):
+
+            cv2.imshow('Camera', old_frame)
+
+            ret, new_frame = cap.read()
+            next_frame = new_frame
+            if not ret:
+                break
+
+            if gray:
+                next_frame = cv2.cvtColor(new_frame, cv2.COLOR_BGR2GRAY)
+
+            old_frame = new_frame
+            prevs_frame = next_frame
+
+        cv2.destroyAllWindows()
