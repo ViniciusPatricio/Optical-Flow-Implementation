@@ -16,7 +16,20 @@ if __name__ == '__main__':
             video_select = input("Selecionar vídeo: ")
 
             video_path = path+"/videos/"+files_videos[int(video_select)-1]
-            video_optical_flow(video_path, 0)
+            while (True):
+                select_method = input("Selecione o método do Optical Flow: ")
+                if (select_method == "1"):
+                    method1 = cv2.optflow.calcOpticalFlowSparseToDense
+                    params = [None, 8, 128, 0.001, True, 500.0, 3]
+                    video_optical_flow(video_path, method1,
+                                       params, resize=True, fx=0.3, fy=0.3)
+                elif (select_method == "2"):
+                    method2 = cv2.calcOpticalFlowFarneback
+                    params2 = [None, 0.3, 5, 10, 5, 11, 1.5, 0]
+                    video_optical_flow(video_path, method2,
+                                       params2, resize=True, fx=0.3, fy=0.3)
+                else:
+                    break
 
         elif select_test == "2":
             while (True):

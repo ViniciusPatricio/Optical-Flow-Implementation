@@ -49,6 +49,7 @@ def webcam_optical_flow(method, params=[], gray=True):
     prevs_frame = old_frame
     if (gray):
         prevs_frame = cv2.cvtColor(old_frame, cv2.COLOR_BGR2GRAY)
+
     while True:
         cv2.imshow('Camera', old_frame)
 
@@ -74,35 +75,44 @@ def webcam_optical_flow(method, params=[], gray=True):
     cv2.destroyAllWindows()
 
 
-def video_optical_flow(video_path, method, params=[], gray=True, resize=True):
+def video_optical_flow(video_path, method, params=[], gray=True, resize=True, fx=0.5, fy=0.5):
     cap = cv2.VideoCapture(video_path)
     # Read the first frame
     ret, old_frame = cap.read()
 
-    hsv = np.zeros_like(old_frame)
-    hsv[..., 1] = 255
-
     if (resize):
-        old_frame = cv2.resize(old_frame, (650, 480))
+        old_frame = cv2.resize(old_frame,  None, fx=fx, fy=fy)
 
     prevs_frame = old_frame
 
     if (gray):
         prevs_frame = cv2.cvtColor(old_frame, cv2.COLOR_BGR2GRAY)
 
+    hsv = np.zeros_like(old_frame)
+    hsv[..., 1] = 255
+
     while (True):
 
-        cv2.imshow('Vídeo', old_frame)
+        cv2.imshow('Video', old_frame)
 
         ret, new_frame = cap.read()
 
         if not ret:
             break
         if (resize):
-            new_frame = cv2.resize(new_frame, (650, 480))
+            new_frame = cv2.resize(new_frame, None, fx=fx, fy=fy)
         next_frame = new_frame
+
         if gray:
             next_frame = cv2.cvtColor(new_frame, cv2.COLOR_BGR2GRAY)
+
+        flow = method(prevs_frame, next_frame, *params)
+        mag, ang = cv2.cartToPolar(flow[..., 0], flow[..., 1])
+        hsv[..., 0] = ang*180/np.pi/2
+        hsv[..., 2] = cv2.normalize(mag, None, 0, 255, cv2.NORM_MINMAX)
+        bgr = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+
+        cv2.imshow('Optical Flow', bgr)
 
         old_frame = new_frame
         prevs_frame = next_frame
